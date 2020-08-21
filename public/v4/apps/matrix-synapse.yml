@@ -1,0 +1,72 @@
+captainVersion: 4
+services:
+    $$cap_appname:
+            volumes:
+              - $$cap_appname-data:/data
+            restart: always
+            environment:
+              SYNAPSE_CONFIG_PATH: /etc/synapse/homeserver.yaml
+            caproverExtra:
+                containerHttpPort: '8008'
+                dockerfileLines:
+                  - FROM matrixdotorg/synapse:$$cap_synapse_version
+                  - RUN mkdir /etc/synapse
+                  - 'RUN echo ''server_name: "$$cap_appname.$$cap_root_domain"'' > /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''pid_file: "/data/homeserver.pid"'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''listeners:'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''  - port: 8008'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''    tls: false'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''    type: http'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''    x_forwarded: true'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "    bind_addresses: [''::1'', ''127.0.0.1'']" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''    resources:'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''      - names: [client, federation]'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''        compress: false'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''federation_ip_range_blacklist:'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''127.0.0.0/8''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''10.0.0.0/8''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''172.16.0.0/12''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''192.168.0.0/16''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''100.64.0.0/10''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''169.254.0.0/16''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''::1/128''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''fe80::/64''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo "  - ''fc00::/7''" >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''    '' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''database:'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''  name: sqlite3'' >> /etc/synapse/homeserver.yaml'                  
+                  - 'RUN echo ''  args:'' >> /etc/synapse/homeserver.yaml'
+
+                  - 'RUN echo ''    database: "/data/homeserver.db"'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''media_store_path: "/data/media_store"'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''report_stats: false'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''log_config: "/data/$$cap_appname.$$cap_root_domain.log.config"'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''signing_key_path: "/data/$$cap_appname.$$cap_root_domain.signing.key"'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''trusted_key_servers:'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''  - server_name: "matrix.org"'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN rs=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32}); echo ''macaroon_secret_key: ${rs}'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN rs=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32}); echo ''form_secret: ${rs}'' >> /etc/synapse/homeserver.yaml'
+                    
+caproverOneClickApp:
+    variables:
+        - id: '$$cap_synapse_version'
+          label: Matrix Latest
+          defaultValue: 'v1.19.0'
+          description: Check out their Docker page for the valid tags https://hub.docker.com/r/matrixdotorg/synapse/tags
+          validRegex: "/.{1,}/"
+    instructions:
+        start: |-
+            A description that will be displayed to the user when they
+            are installing one click app!
+            It can be multiline and contain more details and probably special
+            hardware requirements!
+        end: |-
+            A summary when the app is deployed!
+            It can be multiline.
+
+            It can also include the dynamic parameters such as
+            $$cap_appname
+    displayName: matrix-synapse
+    isOfficial: true ## Only if all images used here are official or from a trusted source.
+    description: Decentralized chat.
+    documentation: This docker-compose is taken from official GitHub page
