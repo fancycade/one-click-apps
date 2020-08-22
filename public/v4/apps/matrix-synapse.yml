@@ -6,6 +6,8 @@ services:
             restart: always
             environment:
               SYNAPSE_CONFIG_PATH: /etc/synapse/homeserver.yaml
+              UID: "0"
+              GID: "0"
             caproverExtra:
                 containerHttpPort: '8008'
                 dockerfileLines:
@@ -41,7 +43,7 @@ services:
                   - 'RUN echo ''media_store_path: "/data/media_store"'' >> /etc/synapse/homeserver.yaml'
                   - 'RUN echo ''report_stats: false'' >> /etc/synapse/homeserver.yaml'
                   - 'RUN echo ''log_config: "/data/$$cap_appname.$$cap_root_domain.log.config"'' >> /etc/synapse/homeserver.yaml'
-                  - 'RUN echo ''signing_key_path: "/data/$$cap_appname.$$cap_root_domain.signing.key"'' >> /etc/synapse/homeserver.yaml'
+                  - 'RUN echo ''signing_key_path: "/etc/synapse/$$cap_appname.$$cap_root_domain.signing.key"'' >> /etc/synapse/homeserver.yaml'
                   - 'RUN echo ''trusted_key_servers:'' >> /etc/synapse/homeserver.yaml'
                   - 'RUN echo ''  - server_name: "matrix.org"'' >> /etc/synapse/homeserver.yaml'
                   - 'RUN rs=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32}); echo ''macaroon_secret_key: ${rs}'' >> /etc/synapse/homeserver.yaml'
